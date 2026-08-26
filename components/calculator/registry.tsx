@@ -1,4 +1,10 @@
 import type { ComponentType } from "react"
+import { PercentageCalculator } from "./impl/percentage-calculator"
+import { AgeCalculator } from "./impl/age-calculator"
+import { BmiCalculator } from "./impl/bmi-calculator"
+import { DiscountCalculator } from "./impl/discount-calculator"
+import { LoanCalculator } from "./impl/loan-calculator"
+import { DateCalculator } from "./impl/date-calculator"
 
 /**
  * Registry of interactive calculator components, keyed by calculator slug.
@@ -8,7 +14,7 @@ import type { ComponentType } from "react"
  * that metadata stays a plain, importable data module while the interactive
  * pieces (which may be client components) live here.
  *
- * ── Adding a calculator's interface (Stage 3) ────────────────────────────
+ * ── Adding a calculator's interface ──────────────────────────────────────
  * 1. Build the interactive component, e.g.
  *    `components/calculator/impl/percentage-calculator.tsx`.
  * 2. Import it below and add it to `calculatorComponents` under its slug.
@@ -20,10 +26,13 @@ import type { ComponentType } from "react"
 
 export type CalculatorComponent = ComponentType
 
-// Example (Stage 3):
-// import { PercentageCalculator } from "@/components/calculator/impl/percentage-calculator"
 export const calculatorComponents: Record<string, CalculatorComponent> = {
-  // "percentage-calculator": PercentageCalculator,
+  "percentage-calculator": PercentageCalculator,
+  "age-calculator": AgeCalculator,
+  "bmi-calculator": BmiCalculator,
+  "discount-calculator": DiscountCalculator,
+  "loan-calculator": LoanCalculator,
+  "date-calculator": DateCalculator,
 }
 
 export function getCalculatorComponent(

@@ -159,7 +159,7 @@ export const calculators: CalculatorMeta[] = [
     icon: Percent,
     keywords: ["percent", "percentage", "%", "percent change", "increase", "decrease", "ratio", "proportion"],
     popular: true,
-    status: "coming-soon",
+    status: "available",
     content: {
       intro:
         "Work out any percentage in seconds — a portion of a number, what percent one value is of another, or the percentage increase or decrease between two numbers.",
@@ -203,7 +203,7 @@ export const calculators: CalculatorMeta[] = [
     icon: CalendarDays,
     keywords: ["age", "birthday", "born", "date of birth", "dob", "how old", "years months days"],
     popular: true,
-    status: "coming-soon",
+    status: "available",
     content: {
       intro:
         "Enter a date of birth to find an exact age broken down into years, months, and days, measured to today or any date you choose.",
@@ -241,7 +241,7 @@ export const calculators: CalculatorMeta[] = [
     icon: HeartPulse,
     keywords: ["bmi", "body mass index", "weight", "height", "obesity", "overweight", "healthy weight"],
     popular: true,
-    status: "coming-soon",
+    status: "available",
     content: {
       intro:
         "Body Mass Index is a quick screening number that relates your weight to your height. Enter both in metric or imperial units to see your BMI and category.",
@@ -281,7 +281,7 @@ export const calculators: CalculatorMeta[] = [
     icon: Tag,
     keywords: ["discount", "sale", "percent off", "savings", "deal", "markdown", "coupon", "price"],
     popular: true,
-    status: "coming-soon",
+    status: "available",
     content: {
       intro:
         "Enter an original price and a discount percentage to instantly see the sale price and how much you save.",
@@ -320,7 +320,7 @@ export const calculators: CalculatorMeta[] = [
     icon: Wallet,
     keywords: ["loan", "mortgage", "emi", "monthly payment", "interest", "amortization", "repayment", "finance"],
     popular: true,
-    status: "coming-soon",
+    status: "available",
     content: {
       intro:
         "Estimate your monthly payment on a fixed-rate loan from the amount borrowed, the annual interest rate, and the term in years.",
@@ -366,7 +366,7 @@ export const calculators: CalculatorMeta[] = [
     icon: CalendarClock,
     keywords: ["date", "days between", "add days", "subtract days", "duration", "deadline", "countdown"],
     popular: true,
-    status: "coming-soon",
+    status: "available",
     content: {
       intro:
         "Add or subtract a number of days from any date, or find exactly how many days fall between two dates.",
