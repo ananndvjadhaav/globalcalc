@@ -12,6 +12,7 @@ import {
   Wallet,
   Activity,
   Home,
+  Coins,
 } from "lucide-react"
 
 /**
@@ -644,6 +645,124 @@ export const calculators: CalculatorMeta[] = [
           question: "Does adding days account for leap years and different month lengths?",
           answer:
             "Yes — the calculator rolls over into the next month or year automatically using real calendar lengths, so leap years like February 2024 are handled correctly.",
+        },
+      ],
+    },
+  },
+  {
+    id: "gold-loan",
+    slug: "gold-loan-calculator",
+    name: "Gold Loan Calculator",
+    summary: "Estimate how much you could borrow against your gold.",
+    description:
+      "Estimate how much you may be able to borrow against your gold based on weight, purity, deductions, gold value, and LTV.",
+    category: "finance",
+    icon: Coins,
+    keywords: [
+      "gold loan",
+      "gold loan calculator",
+      "gold loan eligibility",
+      "loan against gold",
+      "jewellery loan",
+      "LTV",
+      "loan to value",
+      "gold valuation",
+      "gold rate",
+      "gold purity",
+    ],
+    popular: false,
+    status: "available",
+    seoTitle: "Gold Loan Calculator – Estimate Gold Loan Eligibility",
+    seoDescription:
+      "Estimate how much you may be able to borrow against your gold based on weight, purity, deductions, gold value, and LTV.",
+    content: {
+      intro:
+        "Estimate how much you may be able to borrow against gold or gold jewellery, based on its weight, purity, any deductions for non-gold material, the current gold rate, and the loan-to-value (LTV) your lender allows. This calculator focuses on one question: how much can I borrow against my gold?",
+      howItWorks: [
+        "The calculator first subtracts any estimated deductions — for stones, fastenings, or other non-gold material — from the gross weight to get a net gold weight.",
+        "That net gold weight is then converted to its 22K-equivalent using the purity you select, since gold value is commonly assessed relative to 22-karat gold.",
+        "The 22K-equivalent weight is multiplied by the gold valuation rate you enter to get an estimated intrinsic gold value.",
+        "Finally, the estimated maximum loan is that gold value multiplied by the LTV (loan-to-value) percentage you enter — the share of the assessed value a lender may be willing to lend against. A jewellery item's original purchase price isn't used anywhere in this calculation; only its estimated gold content and value are.",
+      ],
+      formula: [
+        {
+          label: "Step 1 — Net gold weight",
+          expression: "Net Gold Weight = Gross Weight − Deductions",
+          where: [
+            { symbol: "Gross Weight", meaning: "Weight before deductions, in grams" },
+            {
+              symbol: "Deductions",
+              meaning: "Estimated non-gold material, entered in grams or as a % of gross weight",
+            },
+          ],
+        },
+        {
+          label: "Step 2 — 22K-equivalent weight",
+          expression: "22K-Equivalent Weight = Net Gold Weight × (Purity ÷ 22)",
+          where: [
+            { symbol: "Purity", meaning: "Karat value of the gold: 24, 22, 21, 18, or 14" },
+          ],
+        },
+        {
+          label: "Step 3 — Estimated gold value",
+          expression: "Estimated Gold Value = 22K-Equivalent Weight × Gold Valuation Rate",
+          where: [
+            {
+              symbol: "Gold Valuation Rate",
+              meaning: "Price per gram you enter, in your selected currency",
+            },
+          ],
+        },
+        {
+          label: "Step 4 — Estimated loan amount",
+          expression: "Estimated Loan Amount = Estimated Gold Value × (LTV ÷ 100)",
+          where: [
+            { symbol: "LTV", meaning: "Loan-to-value percentage set by your lender" },
+          ],
+        },
+      ],
+      example: {
+        scenario:
+          "20 g of jewellery at 22K purity, 1 g of estimated deductions, a gold rate of 6,000 per gram, and a 75% LTV.",
+        steps: [
+          "Net gold weight: 20 g − 1 g = 19 g",
+          "22K-equivalent weight: 19 g × (22 ÷ 22) = 19 g",
+          "Estimated gold value: 19 g × 6,000 = 114,000",
+          "Estimated loan amount: 114,000 × 75% = 85,500",
+        ],
+        result: "The estimated maximum loan is about 85,500 in your selected currency.",
+      },
+      limitations: [
+        "This is a mathematical estimate only — it isn't a loan offer. Actual gold-loan eligibility, valuation, deductions, and LTV are set by the lender's own assessment and applicable local rules.",
+        "Deductions for stones, fastenings, or other non-gold material are normally confirmed during an in-person appraisal; this calculator only reflects the deduction value you enter, which may differ from a lender's own testing.",
+        "LTV limits vary by lender and by country or region — this calculator doesn't apply one universal LTV; enter the LTV that applies to your situation.",
+        "The gold valuation rate isn't looked up automatically — enter a rate appropriate to your local market and currency.",
+      ],
+      faqs: [
+        {
+          question: "How is gold loan eligibility calculated?",
+          answer:
+            "It's estimated by converting your net gold weight to its 22K-equivalent, multiplying by the gold rate you enter to get an estimated gold value, then multiplying that value by the LTV percentage your lender allows.",
+        },
+        {
+          question: "Does jewellery weight include stones?",
+          answer:
+            "The gross weight you enter typically includes everything on the scale, including stones and fastenings. Use the deductions field to estimate the non-gold portion, since lenders usually value only the gold content.",
+        },
+        {
+          question: "What is LTV in a gold loan?",
+          answer:
+            "LTV (loan-to-value) is the percentage of the assessed gold value that a lender may be willing to lend. It varies by lender and by local rules, so enter the LTV that applies to your loan rather than assuming a fixed number.",
+        },
+        {
+          question: "Why is gold purity important?",
+          answer:
+            "Purity (measured in karats) determines how much of the weight is actually gold. Lower-karat gold, like 18K or 14K, contains proportionally less gold than 22K or 24K, so it converts to a smaller 22K-equivalent value for the same weight.",
+        },
+        {
+          question: "Is the calculator's result guaranteed by a lender?",
+          answer:
+            "No. This is an estimate based on the numbers you enter. An actual lender will independently assess the weight, purity, and deductions, and apply their own LTV and terms — the real offer may differ from this estimate.",
         },
       ],
     },

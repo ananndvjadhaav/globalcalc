@@ -1,0 +1,43 @@
+{
+  "summary": "Frontend-only testing of the NEW Gold Loan Calculator at /calculators/gold-loan-calculator (Tests A–H, Smart Insight, regression, accessibility). All 8 primary test cases (A–H) plus Smart Insight, currency switching (USD→EUR→INR), localStorage persistence across reload, validation error messages (LTV/rate/weight/deduction overflow), NaN/Infinity absence, and mobile 390px non-overflow all PASS. Regression on Percentage and Loan calculators still works. Finance category page correctly lists Gold Loan Calculator alongside Loan Calculator (2 CALCULATORS). One minor discoverability nit: Gold Loan Calculator is NOT shown in the homepage 'Popular Calculators' curated list (only the original 6 are listed) — the review request expected it to appear on the homepage. Not a functional bug since homepage shows only 'popular' items and the Finance category count updated to 2, but flagging as low-priority since the request explicitly asked for homepage listing.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Homepage (/)", "issues": ["Gold Loan Calculator is not listed in the 'Popular Calculators' section on the homepage. Only the original 6 (Percentage, Age, BMI, Discount, Loan, Date) are shown. Review request asked for homepage to list Gold Loan Calculator. Finance category card correctly reflects '2 CALCULATORS'. Low priority — may be intentional (popular vs all)."]}
+    ]
+  },
+  "test_results_detail": {
+    "Test A (weight=20, 22K, ded=0, rate=6000, LTV=75)": "PASS — Net 20g, 22K-eq 20g, gold value $120,000.00, loan $90,000 (LOAN_A)",
+    "Test B (ded=1g)": "PASS — Net 19g, 22K-eq 19g, gold value $114,000.00, loan $85,500 (LOAN_B < LOAN_A)",
+    "Test C (18K, ded=0)": "PASS — Net 20g, 22K-eq 16.36g, gold value $98,181.82, loan ≈ $73,636.36 (< LOAN_A)",
+    "Test D (percent mode, 10%)": "PASS — Net 18g, 22K-eq 18g, gold value $108,000.00, loan $81,000",
+    "Test E (deduction=weight)": "PASS — role=alert error shown 'Deductions can't be greater than or equal to the gross weight...'; no negative values shown",
+    "Test F (invalid LTV/rate/weight)": "PASS — All 7 invalid values (LTV 0/-10/101, rate 0/-100, weight 0/-5) produce role=alert error messages",
+    "Test G (currency switch)": "PASS — EUR shows €, INR shows ₹, no stuck $",
+    "Test H (persistence after reload)": "PASS — Currency selector still 'INR' after page reload",
+    "Smart Insight": "PASS — [data-testid='smart-insight'] present with role='note', aria-live='polite'; 'Estimate only' disclaimer visible as muted text below (not styled as error)",
+    "NaN/Infinity": "PASS — none present in DOM",
+    "Mobile 390px overflow": "PASS — scrollWidth=clientWidth=390, no horizontal overflow",
+    "Regression Percentage 15% of 200 = 30": "PASS",
+    "Regression Loan Calculator page": "Loads OK ($20000/6%/5y example present)",
+    "Finance category page": "PASS — Lists Gold Loan Calculator alongside Loan Calculator",
+    "Homepage listing": "MINOR — Gold Loan not in Popular Calculators section (see design_issues)"
+  },
+  "accessibility": "PASS — All inputs (weight, purity, deduction mode, deduction value, rate, LTV, currency) have associated <label htmlFor=...>. Error messages use role='alert'. Smart Insight uses role='note' + aria-live='polite'.",
+  "test_report_links": [],
+  "action_items": [
+    "Optional: consider adding Gold Loan Calculator to the homepage 'Popular Calculators' section (or clarify that only the original 6 are curated as 'popular'). Low priority — functionality is correct."
+  ],
+  "critical_code_review_comments": [
+    "gold-loan-calculator.tsx is clean and well-structured (~240 lines). Validation ordering is correct (checks weight/rate/LTV before deduction), preventing any negative-value display. No hardcoded currency symbols — all monetary output goes through money(value, currency). deductionInput defaults to 0 via `deductionInput ?? 0` so empty deduction correctly means zero.",
+    "No 404 network resource on the gold-loan page was captured in console — one 'Failed to load resource: 404' was observed but likely a favicon/static asset unrelated to feature logic; recommend main agent verify."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (frontend-only)", "frontend": "100% functional, 1 minor discoverability nit"},
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Gold Loan Calculator is fully functional. All formula math verified: NetWeight = Gross - Deductions (grams or % of gross); 22K-eq = Net * (Purity/22); Value = 22K-eq * Rate; Loan = Value * (LTV/100). Currency persistence via localStorage confirmed (INR persists across reload). Validation errors correctly use role='alert'. Segmented control uses data-testid='segment-grams'/'segment-percent'. Only nit is homepage 'Popular Calculators' section doesn't include Gold Loan — main agent should decide if this is by design."
+}

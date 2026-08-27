@@ -5,6 +5,7 @@ import { BmiCalculator } from "./impl/bmi-calculator"
 import { DiscountCalculator } from "./impl/discount-calculator"
 import { LoanCalculator } from "./impl/loan-calculator"
 import { DateCalculator } from "./impl/date-calculator"
+import { GoldLoanCalculator } from "./impl/gold-loan-calculator"
 
 /**
  * Registry of interactive calculator components, keyed by calculator slug.
@@ -33,6 +34,7 @@ export const calculatorComponents: Record<string, CalculatorComponent> = {
   "discount-calculator": DiscountCalculator,
   "loan-calculator": LoanCalculator,
   "date-calculator": DateCalculator,
+  "gold-loan-calculator": GoldLoanCalculator,
 }
 
 export function getCalculatorComponent(
