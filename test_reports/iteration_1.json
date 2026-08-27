@@ -1,0 +1,63 @@
+{
+  "summary": "READ-ONLY QA audit of GlobalCalc (Next.js 16 App Router) completed. All 6 calculators verified mathematically correct against the spec. All 29 routes return expected status codes (28x 200, 1x 404). Header/hero/in-page search + filter chips work. Mobile hamburger works. SEO meta (title, description, canonical, OG, Twitter) and JSON-LD (WebApplication, BreadcrumbList, FAQPage) all present on calculator pages. No console errors other than the pre-known @vercel/analytics 404 in dev/preview. Only minor content/UX gaps found; no functional bugs.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "DiscountCalculator / LoanCalculator (money() helper in components/calculator/impl/fields.tsx)",
+        "issue": "Currency values render without a currency symbol. Spec calls for '$60' / '$20' / '$386.66' but UI shows bare '60.00' / '20.00' / '386.66' in ResultCallout, ResultList, and the '(25%)' sublabel. Values are numerically correct; only the '$' prefix is missing. money() uses toLocaleString with only fraction-digits options, no {style:'currency', currency:'USD'}.",
+        "selector": "[data-testid=calc-result] on /calculators/discount-calculator and /calculators/loan-calculator",
+        "priority": "LOW"
+      },
+      {
+        "component": "DiscountCalculator sublabel",
+        "issue": "Sublabel builds `(${d}%)` from the raw parsed number so decimal input like 25.5 shows as '25.5%' with no formatting; not a bug but slightly inconsistent with other formatted numbers on the same page.",
+        "selector": "[data-testid=calc-result] sublabel",
+        "priority": "LOW"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "All pages (dev/preview only)",
+        "issues": [
+          "Console error on every navigation: 'Failed to load resource: /_vercel/insights/script.js 404'. This is the pre-known @vercel/analytics issue in non-production env and is expected — no fix needed."
+        ]
+      }
+    ]
+  },
+  "verified_math_and_flows": {
+    "Percentage": {"of 15%,200": "30 (OK)", "isWhat 50/200": "25% (OK)", "isWhat b=0": "error shown (OK)", "change 40->52": "30% increase (OK)", "change a=0": "error shown (OK)"},
+    "Age": {"2000-01-01 -> 2024-07-01": "24y 6m 0d (OK)", "2000-02-29 -> 2024-02-28 (leap edge)": "23y 11m 30d — mathematically correct (birthday hasn't recurred yet on 2024-02-28)", "dob>target": "error shown (OK)"},
+    "BMI": {"metric 70kg/175cm": "22.9 Normal weight (OK)", "imperial 154lb 5ft9in": "22.7 Normal weight (OK)", "cm=0": "error shown (OK)"},
+    "Discount": {"80/25%": "final 60.00, save 20.00 (OK — but missing $ prefix)", "disc>100": "error (OK)", "negative price": "error (OK)"},
+    "Loan": {"20000/6%/5y": "386.66 monthly (OK)", "20000/0%/5y": "333.33 monthly (OK — no crash)", "negative rate": "error (OK)", "amount<=0": "error (OK)", "years<=0": "error (OK)"},
+    "Date": {"2024-03-01 to 2024-03-15": "14 days (OK)", "2024-02-28 to 2024-03-01 (leap 2024)": "2 days (OK)", "2024-01-10 + 30 days": "Feb 9, 2024 (OK)", "negative days field": "error shown (OK)"},
+    "Routing": "All 28 expected paths return 200; /nonexistent-page returns 404. Both /calculators/[category-slug] AND /categories/[category-slug] work (duplicate category listings intentional per lib/calculators.ts categoryPath).",
+    "Navigation": "Header (Home/Calculators/Categories) & mobile hamburger open/close verified. Breadcrumbs render on calculator + category pages. 'Related calculators' section present on Age & Date pages (both in date-time category) and correctly ABSENT on Percentage/BMI/Discount/Loan — matches known content gap.",
+    "Search": "Hero search redirects to /calculators?q=<term>; in-page search input (class .h-12) filters live: 'percent'->Percentage only, 'bmi'->BMI only, 'xyzxyz'->'No calculators found' empty state, clearing restores all 6. Filter chip group has role='group' aria-label='Filter by category'.",
+    "SEO": "Title, meta description, canonical, OG (type/siteName/title/description/url/locale), Twitter card=summary_large_image all present. JSON-LD @type WebApplication + BreadcrumbList + FAQPage all emitted on calculator pages; breadcrumb items and FAQ Q&A match visible page content.",
+    "Responsive": "Desktop 1920x1080 and mobile 390x844 checked on homepage, /calculators, and all 6 calculator pages. No horizontal overflow (scrollWidth == innerWidth on mobile). Two-column Inputs/Result grid collapses to single column on mobile.",
+    "Accessibility": "All calc inputs have <label htmlFor>. Segmented toggles have role='group' and aria-pressed on each button. Error messages use role='alert' via ErrorNote. Heading hierarchy h1 (page title) -> h2 (sections) preserved. Focus ring visible via focus-visible:ring on inputs & buttons."
+  },
+  "test_report_links": [],
+  "action_items": [
+    "OPTIONAL/LOW: Consider updating money() in components/calculator/impl/fields.tsx to include a currency symbol (e.g. {style:'currency', currency:'USD'}) so Discount and Loan results match the '$60' / '$386.66' style described in the spec/example content. Currently outputs plain '60.00'.",
+    "OPTIONAL/LOW: In DiscountCalculator ResultCallout sublabel, format the discount percentage via fmt() for consistency with other numbers.",
+    "NO ACTION: Confirmed the @vercel/analytics /_vercel/insights/script.js 404 in dev/preview — expected, not to fix per audit request."
+  ],
+  "critical_code_review_comments": [
+    "money() helper omits currency symbol despite being used exclusively for monetary values (final price, savings, monthly payment, total interest, total payment). Cheap fix, larger UX win.",
+    "Two separate category route trees exist (/calculators/[category] and /categories/[slug]) — both return 200 with similar content. This may cause duplicate-content SEO concerns; canonical URLs should point at one canonical category path. lib/calculators.ts categoryPath() returns /calculators/{slug}, but /categories/{slug} is also live.",
+    "Age calc note: for a leap-day DOB (2000-02-29) evaluated on 2024-02-28, result is 23y 11m 30d. Mathematically correct, but some products treat 'has your birthday occurred this year?' for Feb-29 births as 'Yes on Feb 28 in non-leap years and on Feb 29 in leap years'. Consider documenting this convention in the FAQ.",
+    "Discount sublabel interpolates raw `${d}` without number formatting — inconsistent with fmt()/money() usage elsewhere."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (no backend)", "frontend": "100% of core flows pass; 2 low-severity display gaps"},
+  "test_credentials": "N/A - no auth on site.",
+  "seed_data_creation": "None.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "This is a client-only Next.js 16 app at /app root (no backend/DB). All 6 calculators verified. Only minor cosmetic gaps found. If main agent adds a $ prefix to money(), re-run the loan and discount playwright checks above and re-check no test-id regressions on [data-testid=calc-result]. All calculator components use data-testid='calc-error'/'calc-empty'/'calc-result' and segment-<value> for mode buttons; input ids follow #pct-a/#pct-b, #age-dob/#age-asof, #bmi-kg/#bmi-cm/#bmi-lb/#bmi-ft/#bmi-in, #disc-price/#disc-percent, #loan-amount/#loan-rate/#loan-years, #date-start/#date-end/#date-base/#date-days.",
+  "rca of the issue": "N/A - no critical issues to RCA. The single confirmed console 404 (_vercel/insights/script.js) is the @vercel/analytics client attempting to hit its bundle path; in a Vercel prod deployment it is served automatically, but in a self-hosted 'next dev'/preview env there is no such route, hence the 404. It is guarded to only render in NODE_ENV=production per app/layout.tsx, but the request still occurs in preview builds where NODE_ENV=production but the /_vercel edge is absent — expected per the audit brief."
+}
