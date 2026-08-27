@@ -10,7 +10,6 @@ import { HeaderSearch } from "@/components/header-search"
 const navItems = [
   { href: "/", label: "Home" },
   { href: "/calculators", label: "Calculators" },
-  { href: "/categories", label: "Categories" },
 ]
 
 export function SiteHeader() {

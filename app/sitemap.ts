@@ -8,7 +8,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes = [
     "/",
     "/calculators",
-    "/categories",
     "/about",
     "/contact",
     "/privacy",
@@ -22,7 +21,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }))
 
   const categoryRoutes = categories.map((category) => ({
-    url: absoluteUrl(`/categories/${category.slug}`),
+    url: absoluteUrl(`/calculators/${category.slug}`),
     lastModified: now,
     changeFrequency: "monthly" as const,
     priority: 0.6,

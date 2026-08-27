@@ -22,7 +22,7 @@ export function CategoryGrid() {
             return (
               <Link
                 key={category.slug}
-                href={`/categories/${category.slug}`}
+                href={`/calculators/${category.slug}`}
                 className="group flex items-start gap-4 rounded-lg border border-border bg-card p-5 transition-colors hover:border-primary/50 hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
               >
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-secondary text-primary">
