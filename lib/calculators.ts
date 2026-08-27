@@ -328,6 +328,11 @@ export const calculators: CalculatorMeta[] = [
           answer:
             "Ages are compared using calendar days only, so if a birth time is recorded near midnight, the exact calendar day can depend on the time zone used when it was recorded.",
         },
+        {
+          question: "How does it handle a birthday on February 29?",
+          answer:
+            "In a year where February only has 28 days, a February 29 birthday hasn't calendar-completed until March 1, so the calculator shows one year less (with 11 months, 30 days remaining) on February 28 and rolls over to the next full year on March 1. In leap years, it completes on February 29 as expected.",
+        },
       ],
     },
   },

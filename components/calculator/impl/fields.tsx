@@ -177,11 +177,11 @@ export function fmt(n: number, digits = 2): string {
   })
 }
 
-/** Format a monetary value with exactly two decimals. */
+/** Format a monetary value with a "$" prefix and exactly two decimals. */
 export function money(n: number): string {
   if (!Number.isFinite(n)) return "—"
-  return n.toLocaleString(undefined, {
+  return `$${n.toLocaleString(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  })
+  })}`
 }

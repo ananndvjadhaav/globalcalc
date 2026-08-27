@@ -11,6 +11,7 @@ import {
   ResultList,
   ResultStat,
   parseNum,
+  fmt,
   money,
 } from "./fields"
 
@@ -76,7 +77,7 @@ export function DiscountCalculator() {
         <ResultCallout
           label="Final price"
           value={money(final)}
-          sublabel={`You save ${money(saved)} (${d}%)`}
+          sublabel={`You save ${money(saved)} (${fmt(d)}%)`}
         />
         <ResultList>
           <ResultStat label="Original price" value={money(p)} />

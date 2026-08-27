@@ -1,0 +1,26 @@
+{
+  "summary": "Targeted verification of 3 small QA fixes on GlobalCalc (Next.js 16). All 3 fixes confirmed working and light regression spot-check on Percentage/Age/BMI passes cleanly. No new issues found.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "verified_checks": {
+    "1_discount_currency_symbol": "PASS - /calculators/discount-calculator with price=80, percent=25 -> [data-testid='calc-result'] renders 'Final price $60.00' and sublabel 'You save $20.00 (25%)'. Leading '$' present on both amounts.",
+    "2_loan_currency_symbol": "PASS - /calculators/loan-calculator with 20000/6/5 -> Monthly payment '$386.66', and stats show Principal '$20,000.00', Total interest '$3,199.36', Total payment '$23,199.36'. All have leading '$'.",
+    "3_discount_decimal_25.5": "PASS - price=80 percent=25.5 -> final '$59.60', sublabel 'You save $20.40 (25.5%)'. No NaN/errors. fmt() correctly preserves the '.5' decimal.",
+    "4_age_feb29_faq_and_jsonld": "PASS - Age calc page has a 'How does it handle a birthday on February 29?' accordion under 'Frequently asked questions'. Clicks open and reveals answer. <script type='application/ld+json' @type='FAQPage' mainEntity[]> includes this Feb 29 question/answer.",
+    "5_regression_spotcheck": "PASS - Percentage 15% of 200 = 30; Age 2000-01-01 to 2024-07-01 = 24 years, 6 months, 0 days (Totals: 294 months, 1,278 weeks, 8,948 days); BMI 70kg/175cm = 22.9 Normal weight. No regression from the 3 edits."
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "100% (5/5 checks)"},
+  "seed_data_creation": "",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Only the 3 small QA fixes were re-verified in this round (money() '$' prefix, DiscountCalculator fmt(d) sublabel, Feb 29 FAQ + FAQPage JSON-LD). Full-breadth audit is in iteration_1.json - do not repeat. Category-route duplication issue is explicitly out of scope. Age calc date input IDs are #age-dob and #age-asof (not #age-target). BMI input IDs are #bmi-kg and #bmi-cm.",
+  "rca of the issue": "N/A - all fixes verified working."
+}
