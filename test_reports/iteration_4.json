@@ -1,0 +1,22 @@
+{
+  "summary": "Targeted retest of the currency-selector bug from iteration_3.json. Verified money() fix on Discount and Loan calculators via Playwright against http://localhost:3000. All currency-formatting checks PASS: default USD shows $, switching to EUR/INR on discount and GBP on loan updates every dynamic amount (final price, discount amount, original price, monthly payment, principal, total interest, total payment, and extra-payment savings text) with the correct symbol and no leftover '$'. Numeric values are unchanged across currencies (e.g. discount stays 60.00, loan monthly stays 386.66) confirming re-formatting rather than re-calculation. localStorage persistence verified: after selecting INR on /calculators/discount-calculator and reloading, the select value is restored to INR and all amounts render with ₹.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "money() fix in components/calculator/impl/fields.tsx is correct — dropping the navigator.language first arg lets Intl.NumberFormat use the runtime default locale and prevents the previous throw on non-BCP-47 tags. Fallback now correctly returns `${currency} amount` instead of hardcoding '$'.",
+    "Note: static 'Worked example' tutorial text on the loan page still contains hardcoded '$20,000' / '$386.66'. Not a bug per se (it's illustrative copy), but if truly locale-agnostic content is desired later, consider parameterising it or removing the currency symbol from the tutorial."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "100%"},
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Currency selector bug from iteration_3 is fully fixed. Discount + Loan calculators verified with USD/EUR/INR/GBP and localStorage persistence. Selects are NATIVE <select> elements (use page.select_option), not radix comboboxes. Testids: disc-currency-select, disc-input-price, disc-input-percent, loan-currency-select, loan-input-amount, loan-input-rate, loan-input-years, loan-input-extra. Result container testids: calc-result (discount) — no loan-results testid found, use body text search from 'RESULT'. Hardcoded '$' remains only in static Worked-example prose, not in reactive result panel — do not flag as regression.",
+  "rca of the issue": "Original bug (iter 3): money() called new Intl.NumberFormat(navigator.language, ...) where navigator.language could be a non-BCP-47 tag causing a RangeError, and the catch fallback hardcoded '$', so every currency change silently fell back to USD symbol. Fix: use undefined for locale (runtime default) and return `${currency} amount` in catch. Confirmed working across USD/EUR/GBP/INR."
+}

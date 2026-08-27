@@ -1,0 +1,61 @@
+{
+  "summary": "Frontend-only QA of new currency + Smart Insight + Loan extra-payment features across all 6 calculators. Core math regressions all PASS. Smart Insight rendering and behavior all PASS. Loan extra-payment PASS. ONE CRITICAL BUG: currency selector on Discount/Loan does NOT visually change the currency symbol — all amounts still show '$' regardless of selection (EUR, INR, GBP, etc.). Root cause identified in money() fallback logic.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "money() in components/calculator/impl/fields.tsx",
+        "issue": "CRITICAL: Changing the Currency select on /calculators/discount-calculator and /calculators/loan-calculator does NOT update any displayed monetary values — every amount continues to render with a hardcoded '$' symbol regardless of the selected currency (verified with EUR, INR — see screenshot: still '$60.00'/'$20.00'/'$80.00' after selecting EUR). Root cause: money() calls `new Intl.NumberFormat(navigator.language, {style:'currency', currency})`. In this preview browser (and any browser reporting a non-BCP-47 locale, e.g. Linux 'en-US@posix'), navigator.language = 'en-US@posix' causes Intl.NumberFormat to throw `RangeError: Invalid language tag: en-US@posix`. Confirmed via page.evaluate. The catch fallback then returns `\"$\" + n.toLocaleString(...)` — hardcoded '$' regardless of the currency arg, so EUR/INR/GBP/etc. all render as '$'. Fix: pass `undefined` (or a sanitized/whitelisted locale) as the first arg to Intl.NumberFormat so it uses the runtime default which handles the currency param correctly — e.g. `new Intl.NumberFormat(undefined, {style:'currency', currency}).format(n)`. Also fix the catch fallback so it does not hardcode '$' (use a symbol lookup or at least prefix with the currency code).",
+        "selector": "[data-testid=\"disc-currency-select\"], [data-testid=\"loan-currency-select\"]",
+        "priority": "CRITICAL"
+      },
+      {
+        "component": "PercentageCalculator SmartInsight (change mode)",
+        "issue": "Cosmetic: Insight text for 40→52 shows multiplier as '1.3' instead of the '1.30' specified in the review. Cause: fmt() uses minimumFractionDigits: 0, so trailing zeros are trimmed. Not a math error, just a formatting nit.",
+        "selector": "[data-testid=\"smart-insight\"]",
+        "priority": "LOW"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "verified_checks": {
+    "loan_core_math_USD": "PASS - 20000/6%/5y => Monthly $386.66, Total interest $3,199.36, Total payment $23,199.36. Interest share insight: 'approximately 13.8% of your total payments'.",
+    "loan_extra_payment": "PASS - extra=0 shows neutral prompt 'Enter an extra monthly payment above to see how much time and interest you could save.' extra=100 => '13 months sooner', 'Interest saved: $754.98'. extra=200 => '22 months sooner' (monotonic increase confirmed). extra=-50 => inline error 'The extra payment can't be negative.' with role=alert, no savings shown. Core EMI/total interest never changed while typing extras.",
+    "loan_currency_default": "PASS - defaults to USD (correct for this environment).",
+    "loan_currency_persistence": "PASS-partial - localStorage key 'globalcalc:currency' is written and the <select> value is restored after reload. HOWEVER the visible amounts always show '$' due to the money() bug above, so the end-user cannot visually verify persistence of a non-USD choice.",
+    "discount_core_math": "PASS - 80 price, 25% => Final $60.00, You save $20.00 (25%). Insight: \"You're paying 75% of the original price — that's $60.00 instead of $80.00, a saving of $20.00.\"",
+    "percentage_of_mode": "PASS - 15% of 200 = 30, and NO SmartInsight rendered (correct).",
+    "percentage_isWhat_mode": "PASS - 50 is what % of 200 = 25%, and NO SmartInsight rendered (correct).",
+    "percentage_change_mode": "PASS math - 40->52 = 30% increase, SmartInsight present. Minor: multiplier displayed as '1.3' instead of '1.30' (see ui_bugs).",
+    "age_normal": "PASS - DOB 2000-01-01, as-of 2024-07-01 => 24 years, 6 months, 0 days. SmartInsight: 'The next birthday is 184 days away, on Wednesday, January 1.'",
+    "age_leap_feb29": "PASS - DOB 2000-02-29, as-of 2023-02-28 => 23y 11m 30d (unchanged). SmartInsight: 'The next birthday is 1 day away, on Wednesday, March 1.' No crash.",
+    "bmi_metric": "PASS - 70kg/175cm => 22.9 Normal weight. Insight: 'This BMI is within the Normal range, with about 6.6 kg of margin before the Overweight range (BMI 25).' Neutral, non-diagnostic language confirmed.",
+    "bmi_imperial": "PASS - 154lb/5ft9in => 22.7 Normal. Insight uses 'lb' unit correctly, ~15.3 lb margin. Neutral.",
+    "date_difference": "PASS - 2024-03-01 to 2024-03-15 => 14 days. Insight: 'That's 2 weeks.' (no 'and X days' fragment since remainder=0).",
+    "date_add": "PASS - base 2024-01-10 + 30 days => Feb 9, 2024. Insight: 'The resulting date falls on a Friday.'",
+    "no_currency_on_non_monetary": "PASS - Percentage/Age/BMI/Date pages have NO currency selector.",
+    "insight_a11y": "PASS - [data-testid=smart-insight] has role='note' and aria-live='polite'. Rendered inline (not a modal/toast). Uses tw-animate-css fade+slide-in-from-bottom classes, no continuous blink.",
+    "routes_200": "PASS - all 6 /calculators/{slug} routes return HTTP 200.",
+    "responsive_390px": "PASS - Loan page including currency select + extra-payment section fits at 390px with no horizontal overflow (body.scrollWidth === innerWidth).",
+    "no_console_runtime_errors": "PASS - Only harmless 404s for a missing icon/asset ('Failed to load resource: 404'), no JS runtime/pageerrors on any of the 6 pages. No NaN/Infinity displayed. No negative loan balance or negative savings ever displayed."
+  },
+  "test_report_links": [],
+  "action_items": [
+    "CRITICAL: Fix money() in components/calculator/impl/fields.tsx to not depend on navigator.language, which may be an invalid BCP-47 tag (e.g. Linux 'en-US@posix') and cause Intl.NumberFormat to throw. Recommended: `new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(n)` (browser uses its default resolved locale, which is BCP-47 safe). Also remove the hardcoded '$' in the catch fallback — fall back to a symbol lookup or `${currency} ${n.toFixed(2)}` so a fallback path never mislabels the currency.",
+    "MINOR: In percentage-calculator.tsx change-mode SmartInsight, either format the multiplier to always keep 2 decimals (`fmt(multiplier, 2)` with a minimumFractionDigits option, or use `multiplier.toFixed(2)`), so '1.3' renders as '1.30' as the spec requires."
+  ],
+  "critical_code_review_comments": [
+    "money() fallback hardcodes '$' — silently misrepresents the currency whenever Intl.NumberFormat throws. Any exception path should still respect the `currency` parameter.",
+    "money() uses navigator.language directly without validating it is a valid BCP-47 tag. Robust code should pass `undefined` to Intl.NumberFormat (which uses the runtime's default and never throws on locale) or wrap in try/new Intl.Locale() to normalize first.",
+    "fmt(multiplier, 2) with default minimumFractionDigits: 0 loses trailing zeros. For 'exact 2 decimals' display cases (multipliers, percentages when strict), a dedicated helper or an explicit min-decimals arg would prevent regressions like '1.3' vs '1.30'."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (no backend)", "frontend": "~92% (1 critical currency bug affecting Loan+Discount currency selector; everything else PASS)"},
+  "test_credentials": "N/A - no auth on this site.",
+  "seed_data_creation": "None.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "After the money() fix is applied, only re-test the currency selector behavior on /calculators/discount-calculator and /calculators/loan-calculator: (a) selecting EUR should render '€60.00' (or locale equivalent), (b) selecting INR should render '₹' amounts, (c) reload persists selection and displayed symbol matches. No need to re-run other calculators — their core math and SmartInsight behavior are all confirmed working in this run. Env note: this preview browser reports navigator.language='en-US@posix' which is NOT a valid BCP-47 tag; that is the trigger for the current bug and is a realistic representative of some Linux user agents.",
+  "rca of the issue": "Reproduction: 1) open https://globalcalc-inspect.preview.emergentagent.com/calculators/discount-calculator 2) enter price=80, discount=25 3) change Currency select to EUR. Expected: '€60.00' style amounts. Actual: still '$60.00', '$80.00', '$20.00'. RCA: In money() (components/calculator/impl/fields.tsx L206-220), `new Intl.NumberFormat(navigator.language, { style: 'currency', currency })` is called with navigator.language='en-US@posix' in this environment. That is not a valid BCP-47 language tag, so the constructor throws `RangeError: Invalid language tag: en-US@posix` (confirmed via page.evaluate). Control transfers to the catch, which returns `\"$\" + n.toLocaleString(...)` — the '$' is hardcoded and the `currency` arg is ignored. Fix: (a) drop navigator.language and pass `undefined` — `new Intl.NumberFormat(undefined, {style:'currency', currency}).format(n)` — the browser will use its default locale, which is always BCP-47 valid, and the currency symbol will follow the `currency` argument correctly. (b) Additionally, harden the catch branch so it never hardcodes '$' (e.g., use a small { USD:'$', EUR:'€', GBP:'£', INR:'₹', ... } symbol map, or prefix with the ISO code like `${currency} ${n.toFixed(2)}`)."
+}

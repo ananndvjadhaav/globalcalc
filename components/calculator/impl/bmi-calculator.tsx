@@ -14,6 +14,7 @@ import {
   parseNum,
   fmt,
 } from "./fields"
+import { SmartInsight } from "./insight"
 
 type Units = "metric" | "imperial"
 
@@ -22,6 +23,38 @@ function bmiCategory(bmi: number): string {
   if (bmi < 25) return "Normal weight"
   if (bmi < 30) return "Overweight"
   return "Obese"
+}
+
+/**
+ * Distance (in the same weight unit the user entered) to the nearest
+ * relevant BMI category boundary. Purely arithmetic — BMI is proportional
+ * to weight for a fixed height, so the boundary weight scales directly
+ * from the current weight and BMI. Informational only, not a diagnosis.
+ */
+function bmiBoundaryInsight(bmi: number, weight: number, unit: string): string {
+  let boundaryBmi: number
+  let phrase: (diff: string) => string
+
+  if (bmi < 18.5) {
+    boundaryBmi = 18.5
+    phrase = (diff) =>
+      `This BMI is about ${diff} ${unit} below the start of the Normal weight range (18.5–24.9).`
+  } else if (bmi < 25) {
+    boundaryBmi = 25
+    phrase = (diff) =>
+      `This BMI is within the Normal range, with about ${diff} ${unit} of margin before the Overweight range (BMI 25).`
+  } else if (bmi < 30) {
+    boundaryBmi = 25
+    phrase = (diff) =>
+      `This BMI is about ${diff} ${unit} above the top of the Normal range (18.5–24.9).`
+  } else {
+    boundaryBmi = 30
+    phrase = (diff) =>
+      `This BMI is about ${diff} ${unit} above the Overweight/Obese boundary (BMI 30).`
+  }
+
+  const diffAmount = Math.abs(weight * (boundaryBmi / bmi - 1))
+  return phrase(fmt(diffAmount, 1))
 }
 
 export function BmiCalculator() {
@@ -117,6 +150,8 @@ export function BmiCalculator() {
 
   function renderResult() {
     let bmi: number | null = null
+    let weight = 0
+    let unit = "kg"
 
     if (units === "metric") {
       const w = parseNum(kg)
@@ -133,6 +168,8 @@ export function BmiCalculator() {
       }
       const m = h / 100
       bmi = w / (m * m)
+      weight = w
+      unit = "kg"
     } else {
       const w = parseNum(lb)
       const f = parseNum(ft) ?? 0
@@ -149,6 +186,8 @@ export function BmiCalculator() {
         return <ErrorNote>Weight and height must be greater than zero.</ErrorNote>
       }
       bmi = (703 * w) / (totalIn * totalIn)
+      weight = w
+      unit = "lb"
     }
 
     return (
@@ -162,6 +201,7 @@ export function BmiCalculator() {
           <ResultStat label="Category" value={bmiCategory(bmi)} />
           <ResultStat label="Normal range" value="18.5 – 24.9" />
         </ResultList>
+        <SmartInsight>{bmiBoundaryInsight(bmi, weight, unit)}</SmartInsight>
       </div>
     )
   }

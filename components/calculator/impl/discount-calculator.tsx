@@ -5,6 +5,7 @@ import { CalculatorInterface } from "@/components/calculator/calculator-interfac
 import {
   Field,
   TextInput,
+  Select,
   ErrorNote,
   EmptyResult,
   ResultCallout,
@@ -14,16 +15,37 @@ import {
   fmt,
   money,
 } from "./fields"
+import { SmartInsight } from "./insight"
+import { useCurrency, CURRENCIES } from "@/lib/currency"
 
 export function DiscountCalculator() {
   const [price, setPrice] = useState("")
   const [discount, setDiscount] = useState("")
+  const [currency, setCurrency] = useCurrency()
 
   const p = parseNum(price)
   const d = parseNum(discount)
 
   const inputs = (
     <div className="space-y-5">
+      <Field
+        label="Currency"
+        htmlFor="disc-currency"
+        hint="Detected from your browser — change anytime."
+      >
+        <Select
+          id="disc-currency"
+          value={currency}
+          onChange={(e) => setCurrency(e.target.value as typeof currency)}
+          data-testid="disc-currency-select"
+        >
+          {CURRENCIES.map((c) => (
+            <option key={c.code} value={c.code}>
+              {c.code} — {c.name}
+            </option>
+          ))}
+        </Select>
+      </Field>
       <Field label="Original price" htmlFor="disc-price">
         <TextInput
           id="disc-price"
@@ -71,19 +93,25 @@ export function DiscountCalculator() {
 
     const saved = p * (d / 100)
     const final = p - saved
+    const payingPct = 100 - d
 
     return (
       <div>
         <ResultCallout
           label="Final price"
-          value={money(final)}
-          sublabel={`You save ${money(saved)} (${fmt(d)}%)`}
+          value={money(final, currency)}
+          sublabel={`You save ${money(saved, currency)} (${fmt(d)}%)`}
         />
         <ResultList>
-          <ResultStat label="Original price" value={money(p)} />
-          <ResultStat label="Discount amount" value={money(saved)} />
-          <ResultStat label="Final price" value={money(final)} />
+          <ResultStat label="Original price" value={money(p, currency)} />
+          <ResultStat label="Discount amount" value={money(saved, currency)} />
+          <ResultStat label="Final price" value={money(final, currency)} />
         </ResultList>
+        <SmartInsight>
+          You&apos;re paying {fmt(payingPct)}% of the original price — that&apos;s{" "}
+          {money(final, currency)} instead of {money(p, currency)}, a saving of{" "}
+          {money(saved, currency)}.
+        </SmartInsight>
       </div>
     )
   }

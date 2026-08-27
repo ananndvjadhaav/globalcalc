@@ -14,6 +14,7 @@ import {
   parseNum,
   fmt,
 } from "./fields"
+import { SmartInsight } from "./insight"
 
 type Mode = "difference" | "addSubtract"
 type Op = "add" | "subtract"
@@ -157,6 +158,8 @@ export function DateCalculator() {
       const earlier = totalDays >= 0 ? s : e
       const later = totalDays >= 0 ? e : s
       const { years, months, days: dd } = ymdDiff(earlier, later)
+      const weeksPart = Math.floor(abs / 7)
+      const daysRemainder = abs % 7
 
       return (
         <div>
@@ -171,12 +174,21 @@ export function DateCalculator() {
           />
           <ResultList>
             <ResultStat label="Total days" value={fmt(abs, 0)} />
-            <ResultStat label="Total weeks" value={fmt(Math.floor(abs / 7), 0)} />
+            <ResultStat label="Total weeks" value={fmt(weeksPart, 0)} />
             <ResultStat
               label="Years, months, days"
               value={`${years}y ${months}m ${dd}d`}
             />
           </ResultList>
+          {totalDays !== 0 && (
+            <SmartInsight>
+              That&apos;s {fmt(weeksPart, 0)} {weeksPart === 1 ? "week" : "weeks"}
+              {daysRemainder > 0
+                ? ` and ${fmt(daysRemainder, 0)} ${daysRemainder === 1 ? "day" : "days"}`
+                : ""}
+              .
+            </SmartInsight>
+          )}
         </div>
       )
     }
@@ -222,6 +234,10 @@ export function DateCalculator() {
             value={fmt(Math.round(n), 0)}
           />
         </ResultList>
+        <SmartInsight>
+          The resulting date falls on a{" "}
+          {result.toLocaleDateString(undefined, { weekday: "long" })}.
+        </SmartInsight>
       </div>
     )
   }

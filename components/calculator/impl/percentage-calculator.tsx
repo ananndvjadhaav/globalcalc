@@ -12,6 +12,7 @@ import {
   parseNum,
   fmt,
 } from "./fields"
+import { SmartInsight } from "./insight"
 
 type Mode = "of" | "isWhat" | "change"
 
@@ -125,12 +126,19 @@ export function PercentageCalculator() {
 
     const r = ((y - x) / x) * 100
     const dir = r > 0 ? "increase" : r < 0 ? "decrease" : "no change"
+    const multiplier = 1 + r / 100
     return (
-      <ResultCallout
-        label="Percentage change"
-        value={r === 0 ? "0%" : `${fmt(Math.abs(r), 4)}%`}
-        sublabel={`${dir} from ${fmt(x)} to ${fmt(y)}`}
-      />
+      <div>
+        <ResultCallout
+          label="Percentage change"
+          value={r === 0 ? "0%" : `${fmt(Math.abs(r), 4)}%`}
+          sublabel={`${dir} from ${fmt(x)} to ${fmt(y)}`}
+        />
+        <SmartInsight>
+          That&apos;s equivalent to multiplying the original value by{" "}
+          {multiplier.toFixed(2)}.
+        </SmartInsight>
+      </div>
     )
   }
 }

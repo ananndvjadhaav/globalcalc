@@ -12,6 +12,7 @@ import {
   ResultStat,
   fmt,
 } from "./fields"
+import { SmartInsight } from "./insight"
 
 function todayStr(): string {
   const d = new Date()
@@ -48,6 +49,32 @@ function ymdDiff(from: Date, to: Date) {
     months += 12
   }
   return { years, months, days }
+}
+
+function isLeapYear(y: number): boolean {
+  return (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0
+}
+
+/**
+ * Next occurrence of the birth month/day on or after `from`. For a
+ * February 29 birthday, uses March 1 in non-leap years — the same
+ * calendar convention already used by ymdDiff for that edge case.
+ */
+function nextBirthday(birth: Date, from: Date): Date {
+  const isFeb29 = birth.getMonth() === 1 && birth.getDate() === 29
+
+  function candidate(year: number): Date {
+    if (isFeb29 && !isLeapYear(year)) {
+      return new Date(year, 2, 1)
+    }
+    return new Date(year, birth.getMonth(), birth.getDate())
+  }
+
+  let next = candidate(from.getFullYear())
+  if (next.getTime() < from.getTime()) {
+    next = candidate(from.getFullYear() + 1)
+  }
+  return next
 }
 
 export function AgeCalculator() {
@@ -109,6 +136,11 @@ export function AgeCalculator() {
     const totalMonths = years * 12 + months
     const totalWeeks = Math.floor(totalDays / 7)
 
+    const nextBday = nextBirthday(birth, target)
+    const daysToNextBday = Math.round(
+      (nextBday.getTime() - target.getTime()) / 86_400_000,
+    )
+
     return (
       <div>
         <ResultCallout
@@ -123,6 +155,17 @@ export function AgeCalculator() {
           <ResultStat label="Total weeks" value={fmt(totalWeeks, 0)} />
           <ResultStat label="Total days" value={fmt(totalDays, 0)} />
         </ResultList>
+        <SmartInsight>
+          {daysToNextBday === 0
+            ? "The next birthday is today."
+            : `The next birthday is ${fmt(daysToNextBday, 0)} ${
+                daysToNextBday === 1 ? "day" : "days"
+              } away, on ${nextBday.toLocaleDateString(undefined, {
+                weekday: "long",
+                month: "long",
+                day: "numeric",
+              })}.`}
+        </SmartInsight>
       </div>
     )
   }

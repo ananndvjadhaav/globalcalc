@@ -1,7 +1,8 @@
 "use client"
 
-import type { InputHTMLAttributes, ReactNode } from "react"
+import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes } from "react"
 import { cn } from "@/lib/utils"
+import type { CurrencyCode } from "@/lib/currency"
 
 /**
  * Small, shared presentational helpers for the interactive calculators.
@@ -47,6 +48,24 @@ export function TextInput({
       )}
       {...props}
     />
+  )
+}
+
+export function Select({
+  className,
+  children,
+  ...props
+}: SelectHTMLAttributes<HTMLSelectElement>) {
+  return (
+    <select
+      className={cn(
+        "h-11 w-full rounded-md border border-input bg-background px-3 text-base text-foreground outline-none transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </select>
   )
 }
 
@@ -177,11 +196,27 @@ export function fmt(n: number, digits = 2): string {
   })
 }
 
-/** Format a monetary value with a "$" prefix and exactly two decimals. */
-export function money(n: number): string {
+/**
+ * Format a monetary value using the given ISO currency code (defaults to
+ * USD, preserving prior behavior for any caller that doesn't pass one).
+ * Uses the native Intl.NumberFormat currency formatter so the symbol,
+ * decimal count, and grouping follow real currency/locale conventions
+ * instead of a hard-coded "$".
+ */
+export function money(n: number, currency: CurrencyCode = "USD"): string {
   if (!Number.isFinite(n)) return "—"
-  return `$${n.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`
+  try {
+    // `undefined` locale = the runtime's own default, which is always a
+    // valid BCP-47 tag (unlike some environments' navigator.language,
+    // e.g. "en-US@posix" on some Linux browsers, which Intl rejects).
+    return new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency,
+    }).format(n)
+  } catch {
+    return `${currency} ${n.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`
+  }
 }
