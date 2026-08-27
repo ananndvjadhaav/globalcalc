@@ -11,6 +11,7 @@ import {
   Explanation,
   FormulaBlock,
   ExampleBlock,
+  Limitations,
   FaqList,
 } from "@/components/calculator/sections"
 import { getCalculatorComponent } from "@/components/calculator/registry"
@@ -155,6 +156,7 @@ export default async function CalculatorPage({
         <Explanation paragraphs={content?.howItWorks} />
         <FormulaBlock formula={content?.formula} />
         <ExampleBlock example={content?.example} />
+        <Limitations notes={content?.limitations} />
         <FaqList faqs={content?.faqs} />
 
         {/* Internal linking: parent category + full directory. */}
